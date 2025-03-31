@@ -1,8 +1,8 @@
 package com.example.tasks.controller;
 
-import com.example.tasks.model.Task;
+import com.example.tasks.dto.TaskDTO;
 import com.example.tasks.service.TaskService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.tasks.model.Task;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,27 +10,37 @@ import java.util.List;
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
-    @Autowired
-    private TaskService taskService;
+
+    private final TaskService taskService;
+
+    public TaskController(TaskService taskService) {
+        this.taskService = taskService;
+    }
 
     @PostMapping
-    public Task createTask(@RequestBody Task task) {
-        return taskService.createTask(task);
+    public TaskDTO createTask(@RequestBody TaskDTO taskDTO) {
+        Task task = taskService.toEntity(taskDTO);
+        Task savedTask = taskService.createTask(task); // Предположим, что createTask() сохраняет задачу
+        return taskService.toDTO(savedTask);
     }
 
     @GetMapping("/{id}")
-    public Task getTaskById(@PathVariable Long id) {
-        return taskService.getTaskById(id);
+    public TaskDTO getTask(@PathVariable Long id) {
+        Task task = taskService.getTaskById(id);
+        return taskService.toDTO(task);
     }
 
     @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    public List<TaskDTO> getAllTasks() {
+        List<Task> tasks = taskService.getAllTasks();
+        return taskService.toDTOList(tasks);
     }
 
     @PutMapping("/{id}")
-    public Task updateTask(@PathVariable Long id, @RequestBody Task task) {
-        return taskService.updateTask(id, task);
+    public TaskDTO updateTask(@PathVariable Long id, @RequestBody TaskDTO taskDTO) {
+        Task task = taskService.toEntity(taskDTO);
+        Task updatedTask = taskService.updateTask(id, task);
+        return taskService.toDTO(updatedTask);
     }
 
     @DeleteMapping("/{id}")
