@@ -4,9 +4,10 @@ import com.example.tasks.aspect.annotaion.LogException;
 import com.example.tasks.aspect.annotaion.LogExecution;
 import com.example.tasks.aspect.annotaion.LogTracking;
 import com.example.tasks.dto.TaskDTO;
+import com.example.tasks.kafka.KafkaProducerService;
 import com.example.tasks.model.Task;
 import com.example.tasks.repository.TaskRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,10 +15,12 @@ import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
-//    @Autowired
+
+    private final KafkaProducerService kafkaProducerService;
     private final TaskRepository taskRepository;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(KafkaProducerService kafkaProducerService, TaskRepository taskRepository) {
+        this.kafkaProducerService = kafkaProducerService;
         this.taskRepository = taskRepository;
     }
 
@@ -28,6 +31,7 @@ public class TaskService {
         dto.setTitle(task.getTitle());
         dto.setDescription(task.getDescription());
         dto.setUserId(task.getUserId());
+        dto.setStatus(task.getStatus());
         return dto;
     }
 
@@ -38,6 +42,7 @@ public class TaskService {
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
         task.setUserId(dto.getUserId());
+        task.setStatus(dto.getStatus());
         return task;
     }
 
@@ -66,9 +71,20 @@ public class TaskService {
 
     @LogExecution
     @LogException
-    public Task updateTask(Long id, Task task) {
-        task.setId(id);
-        return taskRepository.save(task);
+    public Task updateTask(Long id, Task updatedTask) {
+        Task currentTask = getTaskById(id);
+        boolean statusChanged = !currentTask.getStatus().equals(updatedTask.getStatus());
+
+        currentTask.setTitle(updatedTask.getTitle());
+        currentTask.setDescription(updatedTask.getDescription());
+        currentTask.setUserId(updatedTask.getUserId());
+        currentTask.setStatus(updatedTask.getStatus());
+
+        if (statusChanged) {
+            kafkaProducerService.send(currentTask.getId(), currentTask.getStatus());
+        }
+
+        return taskRepository.save(currentTask);
     }
 
     @LogExecution
