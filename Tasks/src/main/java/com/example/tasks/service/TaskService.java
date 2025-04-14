@@ -1,13 +1,12 @@
 package com.example.tasks.service;
 
-import com.example.tasks.aspect.annotaion.LogException;
-import com.example.tasks.aspect.annotaion.LogExecution;
-import com.example.tasks.aspect.annotaion.LogTracking;
+import com.example.starter.aspect.annotation.LogException;
+import com.example.starter.aspect.annotation.LogExecution;
+import com.example.starter.aspect.annotation.LogTracking;
 import com.example.tasks.dto.TaskDTO;
 import com.example.tasks.kafka.KafkaProducerService;
 import com.example.tasks.model.Task;
 import com.example.tasks.repository.TaskRepository;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

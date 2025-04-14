@@ -37,9 +37,9 @@ notification:
     to: ivanoff-m@list.ru
 
 logging:
-  level:
-    org.springframework: INFO
-    com.example.tasks.kafka: DEBUG
+  custom:
+    enabled: true
+    level: info
 
 kafka:
   bootstrap:
