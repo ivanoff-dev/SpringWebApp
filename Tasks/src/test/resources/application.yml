@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: Tasks-test
+  datasource:
+    url: jdbc:tc:postgresql:11.13:///test_db
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    consumer:
+      group-id: test-consumer
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+kafka:
+  bootstrap:
+    servers: localhost:9092
+  consumer:
+    group-id: test_group
+  producer:
+    enable: true
+  session_timeout_ms: 15000
+  max_partition:
+    fetch:
+      bytes: 300000
+  max:
+    poll:
+      records: 1
+      interval:
+        ms: 10000
+  topic:
+    task_status_changed: tasks_status_changing
+  listener:
+    poll-timeout: 1000
+
+server:
+  port: 8282
