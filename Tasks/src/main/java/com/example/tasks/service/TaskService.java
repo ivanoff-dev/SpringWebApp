@@ -59,7 +59,8 @@ public class TaskService {
     @LogExecution
     @LogException
     public Task getTaskById(Long id) {
-        return taskRepository.findById(id).orElse(null);
+        return taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Задача с id " + id + " не найдена"));
     }
 
     @LogException
@@ -71,8 +72,10 @@ public class TaskService {
     @LogExecution
     @LogException
     public Task updateTask(Long id, Task updatedTask) {
-        Task currentTask = getTaskById(id);
-        boolean statusChanged = !currentTask.getStatus().equals(updatedTask.getStatus());
+        Task currentTask = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Задача с id " + id + " не найдена"));
+        boolean statusChanged = (currentTask.getStatus() == null && updatedTask.getStatus() != null)
+                || (currentTask.getStatus() != null && !currentTask.getStatus().equals(updatedTask.getStatus()));
 
         currentTask.setTitle(updatedTask.getTitle());
         currentTask.setDescription(updatedTask.getDescription());
@@ -89,6 +92,9 @@ public class TaskService {
     @LogExecution
     @LogException
     public void deleteTask(Long id) {
-        taskRepository.deleteById(id);
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Задача с id " + id + " не найдена"));
+
+        taskRepository.delete(task);
     }
 }
